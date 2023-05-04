@@ -146,10 +146,13 @@ def solve(grid: tp.List[tp.List[str]]) -> tp.Optional[tp.List[tp.List[str]]]:
         return grid
     mb = find_possible_values(grid, empt)
     if not mb:
-        return grid
+        return 0
     for i in mb:
+        checkpoint = grid.copy()
         grid[empt[0]][empt[1]] = i
-        solve(grid.copy())
+        probably = solve(grid)
+        if not probably:
+            grid = checkpoint.copy()
     return grid
 
 
