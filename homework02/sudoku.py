@@ -1,6 +1,7 @@
 import pathlib
 import typing as tp
 from copy import deepcopy
+import random
 
 T = tp.TypeVar("T")
 
@@ -56,7 +57,7 @@ def get_row(grid: tp.List[tp.List[str]], pos: tp.Tuple[int, int]) -> tp.List[str
     >>> get_row([['1', '2', '3'], ['4', '5', '6'], ['.', '8', '9']], (2, 0))
     ['.', '8', '9']
     """
-    #print(pos)
+    # print(pos)
     return grid[pos[0]]
 
 
@@ -102,9 +103,8 @@ def find_empty_positions(grid: tp.List[tp.List[str]]) -> tp.Optional[tp.Tuple[in
     for i in range(n):
         for j in range(n):
             if grid[i][j] == '.':
-                return((i, j))
+                return ((i, j))
     return -1
-
 
 
 def find_possible_values(grid: tp.List[tp.List[str]], pos: tp.Tuple[int, int]) -> tp.Set[str]:
@@ -118,7 +118,7 @@ def find_possible_values(grid: tp.List[tp.List[str]], pos: tp.Tuple[int, int]) -
     >>> values == {'2', '5', '9'}
     True
     """
-    #if pos == -1:
+    # if pos == -1:
     #    return []
     maybe = {'1', '2', '3', '4', '5', '6', '7', '8', '9'}
     for i in get_row(grid, pos):
@@ -131,6 +131,7 @@ def find_possible_values(grid: tp.List[tp.List[str]], pos: tp.Tuple[int, int]) -
         if i in maybe:
             maybe.remove(i)
     return maybe
+
 
 def solve(grid: tp.List[tp.List[str]]) -> tp.Optional[tp.List[tp.List[str]]]:
     """ Решение пазла, заданного в grid """
@@ -149,27 +150,25 @@ def solve(grid: tp.List[tp.List[str]]) -> tp.Optional[tp.List[tp.List[str]]]:
     """
     position = find_empty_positions(grid)
     if position == -1:
-        #display(grid)
+        # display(grid)
         return grid
     values = find_possible_values(grid, position)
     if not values:
         return 0
     checkpoint = []
     for i in values:
-        #display(grid)
+        # display(grid)
         checkpoint.append(deepcopy(grid))
         grid[position[0]][position[1]] = i
         grid = solve(grid)
         if not grid:
-            #print('returning to checkpiont:')
+            # print('returning to checkpiont:')
             grid = deepcopy(checkpoint.pop())
-            #display(grid)
-            #print('that was chckpnt')
+            # display(grid)
+            # print('that was chckpnt')
             continue
         else:
             return grid
-
-
 
 
 def check_solution(solution: tp.List[tp.List[str]]) -> bool:
@@ -178,7 +177,7 @@ def check_solution(solution: tp.List[tp.List[str]]) -> bool:
     clist = set()
     rlist = set()
     blist = set()
-    n = len(grid)
+    n = len(solution)
     for i in range(n):
         for j in get_col(solution, (0, i)):
             if j not in clist:
@@ -219,7 +218,21 @@ def generate_sudoku(N: int) -> tp.List[tp.List[str]]:
     >>> check_solution(solution)
     True
     """
-    pass
+    sudoku = [['.'] * 9 for i in range(9)]
+    if N > 81:
+        return sudoku
+    while N:
+        i, j = random.randint(0, 8), random.randint(0, 8)
+        if sudoku[i][j] != '.':
+            continue
+        element = str(random.randint(1, 9))
+        if element in get_row(sudoku, (i, j)) or element in get_col(sudoku, (i, j)) or element in get_block(sudoku,
+                                                                                                            (i, j)):
+            continue
+        else:
+            sudoku[i][j] = element
+        N -= 1
+    return sudoku
 
 
 if __name__ == "__main__":
@@ -231,4 +244,3 @@ if __name__ == "__main__":
             print(f"Puzzle {fname} can't be solved")
         else:
             display(solution)
-
