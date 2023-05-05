@@ -1,5 +1,6 @@
 import pathlib
 import typing as tp
+from copy import deepcopy
 
 T = tp.TypeVar("T")
 
@@ -55,6 +56,7 @@ def get_row(grid: tp.List[tp.List[str]], pos: tp.Tuple[int, int]) -> tp.List[str
     >>> get_row([['1', '2', '3'], ['4', '5', '6'], ['.', '8', '9']], (2, 0))
     ['.', '8', '9']
     """
+    #print(pos)
     return grid[pos[0]]
 
 
@@ -116,6 +118,8 @@ def find_possible_values(grid: tp.List[tp.List[str]], pos: tp.Tuple[int, int]) -
     >>> values == {'2', '5', '9'}
     True
     """
+    #if pos == -1:
+    #    return []
     maybe = {'1', '2', '3', '4', '5', '6', '7', '8', '9'}
     for i in get_row(grid, pos):
         if i in maybe:
@@ -136,30 +140,61 @@ def solve(grid: tp.List[tp.List[str]]) -> tp.Optional[tp.List[tp.List[str]]]:
         3. Для каждого возможного значения:
             3.1. Поместить это значение на эту позицию
             3.2. Продолжить решать оставшуюся часть пазла
-
+    
+    Траблы с подстановкой нужных цифр
+    
     >>> grid = read_sudoku('puzzle1.txt')
     >>> solve(grid)
     [['5', '3', '4', '6', '7', '8', '9', '1', '2'], ['6', '7', '2', '1', '9', '5', '3', '4', '8'], ['1', '9', '8', '3', '4', '2', '5', '6', '7'], ['8', '5', '9', '7', '6', '1', '4', '2', '3'], ['4', '2', '6', '8', '5', '3', '7', '9', '1'], ['7', '1', '3', '9', '2', '4', '8', '5', '6'], ['9', '6', '1', '5', '3', '7', '2', '8', '4'], ['2', '8', '7', '4', '1', '9', '6', '3', '5'], ['3', '4', '5', '2', '8', '6', '1', '7', '9']]
     """
-    empt = find_empty_positions(grid)
-    if empt == -1:
+    position = find_empty_positions(grid)
+    if position == -1:
+        #display(grid)
         return grid
-    mb = find_possible_values(grid, empt)
-    if not mb:
+    values = find_possible_values(grid, position)
+    if not values:
         return 0
-    for i in mb:
-        checkpoint = grid.copy()
-        grid[empt[0]][empt[1]] = i
-        probably = solve(grid)
-        if not probably:
-            grid = checkpoint.copy()
-    return grid
+    checkpoint = []
+    for i in values:
+        #display(grid)
+        checkpoint.append(deepcopy(grid))
+        grid[position[0]][position[1]] = i
+        grid = solve(grid)
+        if not grid:
+            #print('returning to checkpiont:')
+            grid = deepcopy(checkpoint.pop())
+            #display(grid)
+            #print('that was chckpnt')
+            continue
+        else:
+            return grid
+
+
 
 
 def check_solution(solution: tp.List[tp.List[str]]) -> bool:
     """ Если решение solution верно, то вернуть True, в противном случае False """
     # TODO: Add doctests with bad puzzles
-    pass
+    clist = set()
+    rlist = set()
+    blist = set()
+    n = len(grid)
+    for i in range(n):
+        for j in get_col(solution, (0, i)):
+            if j not in clist:
+                clist.add(j)
+        for j in get_row(solution, (i, 0)):
+            if j not in rlist:
+                rlist.add(j)
+    for i in range(0, n, 3):
+        for j in range(0, n, 3):
+            for k in get_block(solution, (i, j)):
+                if k not in blist:
+                    blist.add(k)
+    if len(clist) == len(rlist) == len(blist) == 9:
+        return True
+    else:
+        return False
 
 
 def generate_sudoku(N: int) -> tp.List[tp.List[str]]:
@@ -196,3 +231,4 @@ if __name__ == "__main__":
             print(f"Puzzle {fname} can't be solved")
         else:
             display(solution)
+
