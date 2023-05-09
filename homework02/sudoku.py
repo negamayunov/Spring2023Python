@@ -150,50 +150,50 @@ def solve(grid: tp.List[tp.List[str]]) -> tp.Optional[tp.List[tp.List[str]]]:
     """
     position = find_empty_positions(grid)
     if position == -1:
-        # display(grid)
+        #display(grid)
         return grid
     values = find_possible_values(grid, position)
     if not values:
         return 0
     checkpoint = []
     for i in values:
-        # display(grid)
         checkpoint.append(deepcopy(grid))
         grid[position[0]][position[1]] = i
         grid = solve(grid)
         if not grid:
-            # print('returning to checkpiont:')
             grid = deepcopy(checkpoint.pop())
-            # display(grid)
-            # print('that was chckpnt')
             continue
         else:
             return grid
 
-
 def check_solution(solution: tp.List[tp.List[str]]) -> bool:
     """ Если решение solution верно, то вернуть True, в противном случае False """
-    # TODO: Add doctests with bad puzzles
     clist = set()
     rlist = set()
     blist = set()
-    n = len(solution)
+    #print(solution)
+    n = len(solution[0])
     for i in range(n):
         for j in get_col(solution, (0, i)):
             if j not in clist:
                 clist.add(j)
+        if len(clist) != 9:
+            return False
         for j in get_row(solution, (i, 0)):
             if j not in rlist:
                 rlist.add(j)
+        if len(rlist) != 9:
+            return False
     for i in range(0, n, 3):
         for j in range(0, n, 3):
             for k in get_block(solution, (i, j)):
                 if k not in blist:
                     blist.add(k)
-    if len(clist) == len(rlist) == len(blist) == 9:
-        return True
-    else:
+            if len(blist) != 9:
+                return False
+    if '.' in clist or '.' in rlist or '.' in blist:
         return False
+    return True
 
 
 def generate_sudoku(N: int) -> tp.List[tp.List[str]]:
@@ -218,25 +218,54 @@ def generate_sudoku(N: int) -> tp.List[tp.List[str]]:
     >>> check_solution(solution)
     True
     """
+
     sudoku = [['.'] * 9 for i in range(9)]
-    if N > 81:
-        return sudoku
-    while N:
+    i = 0
+    while i < 9:
+        j = random.randint(0, 8)
+        impossible = get_block(sudoku, (i, i))
+        n = str(random.randint(1, 9))
+        dots = impossible.count('.')
+        for K in range(dots):
+            impossible.remove('.')
+
+        if n not in impossible:
+            sudoku[i][i] = n
+            i += 1
+
+    sudoku = solve(sudoku)
+    M = 81 - N
+    while M > 0:
         i, j = random.randint(0, 8), random.randint(0, 8)
-        if sudoku[i][j] != '.':
-            continue
-        element = str(random.randint(1, 9))
-        if element in get_row(sudoku, (i, j)) or element in get_col(sudoku, (i, j)) or element in get_block(sudoku,
-                                                                                                            (i, j)):
+        if sudoku[i][j] == '.':
             continue
         else:
-            sudoku[i][j] = element
-        N -= 1
+            sudoku[i][j] = '.'
+            M -= 1
     return sudoku
+    '''
+   for i in range(0, 9, 3):
+        possible = ['1', '2', '3', '4', '5', '6', '7', '8', '9']
+        while possible:
+            n = possible[-1]
+            j = random.randint(0, 8)
+            impossible = get_col(sudoku, (i, j)) + get_row(sudoku, (i,j))
+            dots = impossible.count('.')
+            for K in range(dots):
+                impossible.remove('.')
+            if sudoku[i][j] == '.' and n not in impossible:
+                display(sudoku)
+                sudoku[i][j] = possible.pop()
+            else:
+                print(n, impossible)
+                display(sudoku)
+        '''
+
+
 
 
 if __name__ == "__main__":
-    for fname in ["puzzle1.txt", "puzzle2.txt", "puzzle3.txt"]:
+    for fname in ["custom.txt"]:
         grid = read_sudoku(fname)
         display(grid)
         solution = solve(grid)

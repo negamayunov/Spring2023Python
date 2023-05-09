@@ -224,7 +224,6 @@ class SudokuTestCase(unittest.TestCase):
         solution = sudoku.solve(grid)
         solved = sudoku.check_solution(solution)
         self.assertTrue(solved)
-
         grid = sudoku.generate_sudoku(1000)
         expected_unknown = 0
         actual_unknown = sum(1 for row in grid for e in row if e == ".")
