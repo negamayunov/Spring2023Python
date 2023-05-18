@@ -49,8 +49,18 @@ def multiplicative_inverse(e: int, phi: int) -> int:
     23
     """
     # PUT YOUR CODE HERE
-    pass
+    A, B = phi, e
+    table = []
+    table.append([A, B, A % B, A // B])
+    while A % B != 0:
+        C = A % B
+        A, B = B, C
+        table.append([A, B, A % B, A // B])
 
+    table[-1].append([0, 1])
+    for i in range(len(table) - 2, -1, -1):
+        table[i].append((table[i+1][4][1], table[i+1][4][0] - table[i+1][4][1] * (table[i][0] // table[i][1])))
+    return table[0][4][1] % table[0][0]
 
 def generate_keypair(p: int, q: int) -> tp.Tuple[tp.Tuple[int, int], tp.Tuple[int, int]]:
     if not (is_prime(p) and is_prime(q)):
