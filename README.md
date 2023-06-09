@@ -7,3 +7,4 @@
 - Homework03 – **DONE**
 - Homework04 – **DONE**
 - Homework05 – **DONE**
+- Homework06 – **DONE**
